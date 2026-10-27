@@ -62,7 +62,7 @@ python scripts/migration/migrate.py rehearsal --package C:/private/weknora-trans
    Linux 下替换成实际绝对路径；相同 Python 命令可运行。
 
 4. 恢复脚本要求 `.env`、五个 `WeKnora-*` 容器和目标数据卷都不存在；发现现有环境即拒绝覆盖。
-   它加载保存镜像、恢复配置/技能/文件卷，启动空 PostgreSQL 后导入备份并逐表核对；核对成功才启动应用。
+   它加载保存镜像、恢复配置/技能/文件卷，启动全新 PostgreSQL 后替换镜像预装扩展/表结构、导入备份并逐表核对；核对成功才启动应用。
    自动迁移暂设为 `false`，使用源机同版本镜像，避免意外升级数据库。应用迁移用户复用源数据库用户；
    `database-globals.private.sql` 仅作留档，存在额外外部数据库角色时应单独评估导入。
 

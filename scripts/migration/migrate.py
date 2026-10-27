@@ -287,9 +287,11 @@ def wait_postgres(name):
 
 
 def import_database(name, package):
+    # Both callers create a fresh, isolated database. ParadeDB's entrypoint
+    # preinstalls extensions/schemas, which must be replaced by the snapshot.
     with (package / "database.dump").open("rb") as source:
         docker("exec", "-i", name, "sh", "-c",
-               'exec pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --exit-on-error --no-owner --no-acl',
+               'exec pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --exit-on-error --no-owner --no-acl',
                stdin=source)
 
 
