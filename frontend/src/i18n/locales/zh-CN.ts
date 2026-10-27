@@ -251,8 +251,8 @@ export default {
     filterByAgentWithName: '按智能体筛选：{name}',
     filterAllAgents: '全部智能体',
     claw: {
-      title: 'WeKnora Skill',
-      subtitle: '通过 WeKnora REST API 导入文档并执行混合检索（向量 + 关键词）。适用于上传文件/URL/Markdown 到知识库、跨库检索与浏览知识内容。',
+      title: '云悦云 Skill',
+      subtitle: '通过云悦云 REST API 导入文档并执行混合检索（向量 + 关键词）。适用于上传文件/URL/Markdown 到知识库、跨库检索与浏览知识内容。',
       capabilitiesTitle: 'Skill 能力',
       stepsTitle: '配置步骤',
       openApiSettings: '打开 API 信息',
@@ -261,7 +261,7 @@ export default {
       copyCmdSuccess: '已复制安装命令',
       ecosystemNote: 'Skill 托管于 ClawHub（{\'@\'}lyingbug/weknora），完整 API 说明与版本历史请参见 ClawHub 页面。',
       installCta: '前往 ClawHub',
-      installCtaHint: '安装 WeKnora Skill · 将在新标签页打开',
+      installCtaHint: '安装云悦云 Skill · 将在新标签页打开',
       hubMeta: 'ClawHub · {\'@\'}lyingbug/weknora · MIT-0',
       steps: {
         verify: {
@@ -306,7 +306,7 @@ export default {
     },
     chrome: {
       title: '知识管理助手',
-      subtitle: '配合 WeKnora 自建服务使用：在任意网页侧边栏提问、剪藏内容、Markdown 速记，将浏览中的知识沉淀到你的知识库。',
+      subtitle: '配合云悦云自建服务使用：在任意网页侧边栏提问、剪藏内容、Markdown 速记，将浏览中的知识沉淀到你的知识库。',
       capabilitiesTitle: '核心能力',
       stepsTitle: '配置步骤',
       openApiSettings: '打开 API 信息',
@@ -2122,8 +2122,8 @@ export default {
     pinned: '已置顶'
   },
   platform: {
-    subtitle: '大模型驱动的企业级知识框架',
-    description: 'RAG 检索、智能体推理、Wiki 知识库，让文档真正被理解和运用',
+    subtitle: '云悦云-大模型驱动的企业共享知识框架',
+    description: 'RAG 检索、智能体推理、Wiki 知识库，一级市场AI Native解决方案',
     rag: 'RAG 增强生成',
     agent: 'ReAct 智能体',
     wiki: 'Wiki 知识库',
@@ -2503,9 +2503,9 @@ export default {
     loadingInfo: '正在加载信息...',
     retry: '重试',
     versionLabel: '应用版本',
-    versionDescription: '当前应用服务（weknora-app）的版本号',
+    versionDescription: '当前应用服务的版本号',
     frontendVersionLabel: 'UI 版本',
-    frontendVersionDescription: '当前 UI 界面（weknora-ui）的构建版本号',
+    frontendVersionDescription: '当前 UI 界面的构建版本号',
     versionMismatch: '与应用版本不一致',
     buildTimeLabel: '构建时间',
     buildTimeDescription: '系统构建的时间',
@@ -4145,7 +4145,7 @@ export default {
     }
   },
   createChat: {
-    title: 'Hi，我是 WeKnora，让你的知识触手可及',
+    title: '云悦云已部署，让项目与知识触手可及',
     newSessionTitle: '新会话',
     messages: {
       createFailed: '创建会话失败',
@@ -4389,11 +4389,11 @@ export default {
     haveAccount: '已有账户？',
     backToLogin: '返回登录',
     loginHint: '登录以继续使用；首次使用请在下方创建账户。',
-    firstTime: '首次使用 WeKnora？',
+    firstTime: '首次使用 云悦云？',
     registerSuccess: '注册成功，请登录',
     registerFailed: '注册失败',
     subtitle: 'RAG 问答、ReAct 智能体与 Wiki 知识库，大模型驱动的企业级知识框架',
-    registerSubtitle: '创建账户并开始使用 WeKnora',
+    registerSubtitle: '创建账户并开始使用 云悦云',
     emailPlaceholder: '输入邮箱地址',
     passwordPlaceholder: '输入密码（8-32个字符，包含字母和数字）',
     confirmPasswordPlaceholder: '再次输入密码',
@@ -4416,6 +4416,8 @@ export default {
     registerError: '注册错误，请稍后重试',
     workspaceOnboarding: {
       title: '选择你的工作空间',
+      description: '当前没有可用空间。你可以创建新空间，或接受邀请加入已有空间。',
+      help: '已有团队空间？请联系空间管理员向你的注册邮箱发送邀请。',
       create: '创建空间',
       invitations: '查看邀请',
       loadingPolicy: '正在确认可用的空间加入方式…',
@@ -4795,7 +4797,7 @@ export default {
       paddleocrVlCloudTokenPlaceholder: 'PaddleOCR-VL 飞桨星河社区 Token'
     },
     weknoraCloud: {
-      title: 'WeKnora Cloud',
+      title: '外接 WeKnora Cloud',
       description: '配置 WeKnora Cloud 的 APPID 和 APPSECRET 凭证。凭证用于模型服务和文档解析引擎。',
       viewDocs: '查看文档',
       unconfigured: '尚未配置凭证，请填写 APPID 和 APPSECRET',
@@ -5493,6 +5495,7 @@ export default {
     statusCancelled: '已取消',
     statusDraft: '草稿',
     noDescription: '无描述',
+    clickToUpload: '点击上传',
     emptyKnowledgeDragDrop: '知识为空，拖放上传',
     pdfDocFormat: 'pdf、doc 格式文件，不超过10M',
     textMarkdownFormat: 'text、markdown格式文件，不超过200K',

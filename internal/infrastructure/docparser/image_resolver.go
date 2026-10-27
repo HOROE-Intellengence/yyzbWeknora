@@ -107,6 +107,25 @@ func (r *ImageResolver) ResolveAndStore(
 	}
 	savedRefs := make(map[string]StoredImage)
 
+	// Resolve exact `](path)` destinations before the general Markdown scanner.
+	// Filenames produced by document converters are not always valid Markdown;
+	// for example, a name may contain an unmatched ASCII '(' followed by a
+	// full-width '）'. The balanced-parenthesis scanner correctly rejects that
+	// syntax, but the DocReader image map gives us an unambiguous exact path, so
+	// it is safe to replace this narrow form directly.
+	for refPath := range refMap {
+		marker := "](" + refPath + ")"
+		if !strings.Contains(markdown, marker) {
+			continue
+		}
+		stored, ok := r.saveReferencedImage(ctx, fileSvc, tenantID, refPath, refMap, savedRefs)
+		if !ok {
+			continue
+		}
+		images = appendStoredImage(images, stored)
+		markdown = strings.ReplaceAll(markdown, marker, "]("+stored.ServingURL+")")
+	}
+
 	matches := scanMarkdownImageTargets(markdown)
 
 	// Process in reverse order to preserve positions when replacing

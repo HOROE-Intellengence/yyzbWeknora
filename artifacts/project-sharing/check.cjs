@@ -1,0 +1,8 @@
+const {chromium}=require(process.env.WEKNORA_PLAYWRIGHT_MODULE || 'playwright');
+const {pathToFileURL}=require('node:url');
+const path=require('node:path');
+(async()=>{const b=await chromium.launch({channel:process.env.WEKNORA_BROWSER_CHANNEL || undefined,headless:true});const p=await b.newPage({viewport:{width:1280,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(pathToFileURL(path.join(__dirname,'项目资料共享演示.html')).href);
+for(let i=0;i<6;i++){await p.locator('.step').nth(i).click();await p.waitForTimeout(1600);if(await p.locator('#count').innerText()!=='0'+(i+1))throw Error('scene '+i);await p.screenshot({path:__dirname+'/scene-'+i+'.png',fullPage:true});}
+await p.locator('.step').nth(2).click();await p.waitForTimeout(1800);if(!await p.evaluate(()=>entities.a.x>560&&entities.a.x<580))throw Error('ball position');
+await p.locator('#replay').click();await p.waitForTimeout(9000);if(await p.locator('#count').innerText()!=='02')throw Error('autoplay');await p.locator('#play').click();const before=await p.locator('#progress').getAttribute('style');await p.waitForTimeout(300);if(before!==await p.locator('#progress').getAttribute('style'))throw Error('pause');
+await p.setViewportSize({width:390,height:844});await p.screenshot({path:__dirname+'/mobile-preview.png',fullPage:true});if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('body overflow');if(errors.length)throw Error(errors.join(','));console.log('PASS: six scenes, animated ball, autoplay, pause, replay, mobile containment, no runtime errors');await b.close()})().catch(e=>{console.error(e);process.exit(1)});

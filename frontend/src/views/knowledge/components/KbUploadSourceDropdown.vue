@@ -213,7 +213,9 @@ const openUrlDialog = () => {
   urlDialogVisible.value = true
 }
 
-defineExpose({ openUrlDialog })
+const openFileDialog = () => fileInputRef.value?.click()
+
+defineExpose({ openUrlDialog, openFileDialog })
 </script>
 
 <style lang="less" scoped>

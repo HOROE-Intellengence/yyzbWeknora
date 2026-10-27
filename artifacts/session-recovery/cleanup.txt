@@ -1,0 +1,15 @@
+BEGIN
+UPDATE 50
+UPDATE 4
+UPDATE 3
+UPDATE 2
+COMMIT
+ active_test_users
+-------------------
+                 0
+(1 row)
+
+ active_test_workspaces
+------------------------
+                      0
+(1 row)

@@ -325,7 +325,7 @@ router.beforeEach(async (to, from, next) => {
         return
       }
     }
-    if (authStore.hasValidTenant) {
+    if (authStore.hasValidTenant && to.query.select !== '1') {
       next('/platform/knowledge-bases')
     } else {
       next()

@@ -368,6 +368,35 @@ func TestResolveAndStoreMarkdownImageWithSpacedFilename(t *testing.T) {
 	}
 }
 
+func TestResolveAndStoreMarkdownImageWithUnbalancedParenFilename(t *testing.T) {
+	png := createTestPNG(200, 150)
+	ref := "images/滴滴上市IPO路演PPT(图片版）_page_1.jpg"
+	result := &types.ReadResult{
+		MarkdownContent: "![page](" + ref + ")",
+		ImageRefs: []types.ImageRef{
+			{
+				Filename:    "滴滴上市IPO路演PPT(图片版）_page_1.jpg",
+				OriginalRef: ref,
+				MimeType:    "image/jpeg",
+				ImageData:   png,
+			},
+		},
+	}
+
+	svc := &captureSaveBytes{}
+	r := NewImageResolver()
+	out, imgs, err := r.ResolveAndStore(context.Background(), result, svc, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(imgs) != 1 || len(svc.saved) != 1 {
+		t.Fatalf("expected one stored image, got imgs=%d saved=%d", len(imgs), len(svc.saved))
+	}
+	if strings.Contains(out, ref) || !strings.Contains(out, `![page](local://test/`) {
+		t.Fatalf("unbalanced-paren filename path was not replaced: %s", out)
+	}
+}
+
 func TestResolveAndStoreMarkdownImageTitleContainingRightParen(t *testing.T) {
 	png := createTestPNG(200, 150)
 	result := &types.ReadResult{

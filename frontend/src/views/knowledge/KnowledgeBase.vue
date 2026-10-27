@@ -603,11 +603,6 @@ const sourceOptions = computed(() => [
   { label: t('knowledgeBase.channelSlack'), value: 'slack' },
   { label: t('knowledgeBase.channelIm'), value: 'im' },
 ]);
-// Date range as [start, end] in "YYYY-MM-DD" form (t-date-range-picker default).
-const updatedTimeRange = ref<string[]>([]);
-// Disable any date after today so users cannot filter into the future.
-const disableFutureDate = { after: new Date(new Date().setHours(23, 59, 59, 999)) };
-
 // ── Folder tree (documents uploaded as a folder keep their relative path) ──
 const FOLDER_TREE_COLLAPSED_KEY = 'weknora.kbFolderTreeCollapsed';
 const readStoredFlag = (key: string, fallback = false) => {
@@ -644,7 +639,6 @@ const isFiltering = computed(() =>
     fileType: selectedFileType.value,
     parseStatus: selectedParseStatus.value,
     source: selectedSource.value,
-    timeRange: updatedTimeRange.value,
   }),
 );
 // Sub-folder entries shown at the top of the list while browsing. Search results
@@ -660,15 +654,12 @@ const showDocumentFolderPath = computed(() => hasFolders.value && isFiltering.va
 const folderBreadcrumbs = computed(() => buildFolderBreadcrumbs(selectedFolderPath.value));
 
 const filterParams = computed(() => {
-  const [start, end] = updatedTimeRange.value || [];
   return {
     tag_ids: selectedTagIds.value.length > 0 ? selectedTagIds.value.join(',') : undefined,
     keyword: docSearchKeyword.value ? docSearchKeyword.value.trim() : undefined,
     file_type: selectedFileType.value || undefined,
     parse_status: selectedParseStatus.value || undefined,
     source: selectedSource.value || undefined,
-    start_time: start ? `${start} 00:00:00` : undefined,
-    end_time: end ? `${end} 23:59:59` : undefined,
     folder_path: selectedFolderPath.value,
     // Searching descends into sub-folders; browsing shows one level, with the
     // sub-folders themselves rendered as entries in the list.
@@ -1155,8 +1146,8 @@ watch(selectedFileType, (newVal, oldVal) => {
   }
 });
 
-// 监听解析状态/来源/更新时间范围筛选变化（与文件类型行为一致）
-watch([selectedParseStatus, selectedSource, updatedTimeRange], () => {
+// 监听解析状态/来源筛选变化（与文件类型行为一致）
+watch([selectedParseStatus, selectedSource], () => {
   if (kbId.value) {
     resetPage();
     loadKnowledgeFiles(kbId.value);
@@ -2180,7 +2171,7 @@ const handleListAction = (
 
 // Clear selection on filter/tag/kb change to avoid acting on hidden items.
 watch(
-  [selectedTagIds, docSearchKeyword, selectedFileType, selectedParseStatus, selectedSource, updatedTimeRange, kbId],
+  [selectedTagIds, docSearchKeyword, selectedFileType, selectedParseStatus, selectedSource, kbId],
   () => {
     clearSelection();
   },
@@ -2502,16 +2493,6 @@ async function createNewSession(value: string): Promise<void> {
                     </template>
                   </t-select>
                 </div>
-                <div class="doc-filter-field doc-filter-field--wide">
-                  <t-date-range-picker v-model="updatedTimeRange"
-                    :placeholder="[$t('knowledgeBase.updatedTimeFrom'), $t('knowledgeBase.updatedTimeTo')]"
-                    :disable-date="disableFutureDate" class="doc-date-range doc-filter-field__control" clearable
-                    allow-input>
-                    <template #prefixIcon>
-                      <t-icon name="time" size="16px" />
-                    </template>
-                  </t-date-range-picker>
-                </div>
                 </div>
                 <div class="doc-filter-bar__trailing">
                   <div class="doc-view-toggle" role="group" :aria-label="$t('knowledgeBase.viewModeToggle')">
@@ -2623,7 +2604,14 @@ async function createNewSession(value: string): Promise<void> {
                         ? $t('knowledgeBase.folderTree.emptySearch')
                         : $t('knowledgeBase.folderTree.emptyFolder') }}
                     </p>
-                    <EmptyKnowledge v-else />
+                    <EmptyKnowledge v-else>
+                      <template v-if="canEdit" #action>
+                        <t-button theme="primary" class="empty-upload-button" @click="uploadSourceRef?.openFileDialog()">
+                          <template #icon><t-icon name="upload" /></template>
+                          {{ $t('knowledgeBase.clickToUpload') }}
+                        </t-button>
+                      </template>
+                    </EmptyKnowledge>
                   </div>
                 </template>
               </div>
@@ -3163,10 +3151,6 @@ async function createNewSession(value: string): Promise<void> {
     width: 140px;
     flex-shrink: 0;
 
-    &--wide {
-      width: 280px;
-    }
-
     &__control {
       width: 100%;
     }
@@ -3252,17 +3236,6 @@ async function createNewSession(value: string): Promise<void> {
 
   .doc-type-select {
     width: 100%;
-  }
-
-  .doc-date-range {
-    width: 100%;
-
-    // TDesign focuses both the outer popup reference and inner inputs, which
-    // visually stacks into a "double border" — drop the inner shadow.
-    :deep(.t-input--focused),
-    :deep(.t-is-focused) {
-      box-shadow: none;
-    }
   }
 
   .doc-view-toggle {
@@ -3822,6 +3795,10 @@ async function createNewSession(value: string): Promise<void> {
     justify-content: space-between;
     border-top: 1px solid var(--td-component-stroke);
   }
+}
+
+.empty-upload-button {
+  margin-bottom: 16px;
 }
 
 .doc-empty-state {

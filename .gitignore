@@ -57,3 +57,8 @@ fix-docker.sh
 
 # WeChat Mini Program local/private configuration
 miniprogram/project.private.config.json
+
+# Private migration payloads: credentials, database dumps, uploads and images.
+/backups/
+/migration-private/
+/migration-bundles/

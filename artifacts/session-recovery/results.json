@@ -1,0 +1,309 @@
+[
+  {
+    "name": "register owner",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "register member",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login member",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "register outsider",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login outsider",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "create workspace",
+    "method": "POST",
+    "path": "/tenants",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "self-service rejects privileged quota/status injection",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "switch owner workspace",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "add browser member",
+    "method": "POST",
+    "path": "/tenants/10008/members",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "remove active browser member",
+    "method": "DELETE",
+    "path": "/tenants/10008/members/d91122a2-0e26-4302-80be-662419d67a7f",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "add browser member",
+    "method": "POST",
+    "path": "/tenants/10008/members",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "add browser member",
+    "method": "POST",
+    "path": "/tenants/10008/members",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete active shared workspace",
+    "method": "DELETE",
+    "path": "/tenants/10008",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login test home owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete last remaining workspace",
+    "method": "DELETE",
+    "path": "/tenants/10006",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login for revocation",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "revoke every member session",
+    "method": "POST",
+    "path": "/auth/logout",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login fixture owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "create final-membership invite",
+    "method": "POST",
+    "path": "/tenants/10005/invite-links",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "register account with only invited workspace",
+    "method": "POST",
+    "path": "/auth/register-by-invite",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login invited-only account",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "revoke fixture invite link",
+    "method": "DELETE",
+    "path": "/tenants/10005/invitations/11",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "remove last membership",
+    "method": "DELETE",
+    "path": "/tenants/10005/members/0f6783e6-6ef3-484e-aee8-af33748d4db8",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "refresh after last membership removed",
+    "method": "POST",
+    "path": "/auth/refresh",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "tenantless refreshed identity remains valid",
+    "method": "GET",
+    "path": "/auth/me",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login tenantless member",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "create final UI test workspace",
+    "method": "POST",
+    "path": "/tenants",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "add final UI member to surviving workspace",
+    "method": "POST",
+    "path": "/tenants/10005/members",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login final workspace owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete final active UI workspace",
+    "method": "DELETE",
+    "path": "/tenants/10013",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  }
+]

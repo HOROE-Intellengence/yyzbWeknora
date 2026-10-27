@@ -7,13 +7,13 @@
       <h1>
         {{
           $t(
-            authStore.canCreateTenant
+            selectingWorkspace ? 'tenant.switchTenant' : authStore.canCreateTenant
               ? 'auth.workspaceOnboarding.title'
               : 'auth.workspaceOnboarding.inviteOnlyTitle',
           )
         }}
       </h1>
-      <p class="workspace-description">
+      <p v-if="!selectingWorkspace" class="workspace-description">
         {{
           $t(
             authStore.canCreateTenant
@@ -36,6 +36,19 @@
       </div>
 
       <template v-else>
+        <div v-if="selectingWorkspace" class="workspace-choices">
+          <t-button
+            v-for="membership in authStore.memberships"
+            :key="membership.tenant_id"
+            size="large"
+            variant="outline"
+            :loading="switchingId === membership.tenant_id"
+            :disabled="switchingId !== null"
+            @click="selectWorkspace(membership.tenant_id, membership.tenant_name)"
+          >
+            {{ membership.tenant_name || `#${membership.tenant_id}` }}
+          </t-button>
+        </div>
         <div v-if="!authStore.canCreateTenant" class="invite-only-notice">
           <t-icon name="lock-on" size="20px" aria-hidden="true" />
           <span>{{ $t('auth.workspaceOnboarding.inviteOnlyNotice') }}</span>
@@ -61,7 +74,7 @@
         </div>
       </template>
 
-      <p v-if="!policyLoading && !policyLoadFailed" class="workspace-help">
+      <p v-if="!selectingWorkspace && !policyLoading && !policyLoadFailed" class="workspace-help">
         {{
           $t(
             authStore.canCreateTenant
@@ -81,8 +94,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { MessagePlugin } from 'tdesign-vue-next'
+import { useI18n } from 'vue-i18n'
+import { post } from '@/utils/request'
+import { navigateAfterTenantSwitch, persistLastActiveTenantPreference } from '@/utils/tenantSwitch'
 import CreateTenantDialog from '@/components/CreateTenantDialog.vue'
 import MyInvitationsDialog from '@/components/MyInvitationsDialog.vue'
 import { logout as logoutApi } from '@/api/auth'
@@ -90,7 +107,31 @@ import type { TenantInfo } from '@/api/tenant'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const { t } = useI18n()
+const route = useRoute()
 const authStore = useAuthStore()
+const selectingWorkspace = computed(() => route.query.select === '1' && authStore.memberships.length > 0)
+const switchingId = ref<number | null>(null)
+
+async function selectWorkspace(id: number, name?: string) {
+  if (switchingId.value !== null) return
+  switchingId.value = id
+  try {
+    const response = await post('/api/v1/auth/switch-tenant', {
+      tenant_id: id,
+      refresh_token: authStore.refreshToken,
+    })
+    if (!response.success || !response.token || !response.refresh_token) throw new Error(response.message)
+    authStore.setToken(response.token)
+    authStore.setRefreshToken(response.refresh_token)
+    authStore.setSelectedTenant(id, name || null)
+    await persistLastActiveTenantPreference(id)
+    navigateAfterTenantSwitch()
+  } catch (error: any) {
+    MessagePlugin.error(error?.message || t('error.networkError'))
+    switchingId.value = null
+  }
+}
 const createVisible = ref(false)
 const invitationsVisible = ref(false)
 const policyLoading = ref(true)
@@ -118,7 +159,7 @@ onMounted(async () => {
 watch(
   () => authStore.hasValidTenant,
   (ready) => {
-    if (ready) router.replace('/platform/knowledge-bases')
+    if (ready && route.query.select !== '1') router.replace('/platform/knowledge-bases')
   },
 )
 
@@ -154,6 +195,12 @@ async function handleLogout() {
   background: var(--td-bg-color-container);
   box-shadow: var(--td-shadow-2);
   text-align: center;
+}
+
+.workspace-choices {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
 }
 
 .workspace-mark {

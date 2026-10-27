@@ -3,6 +3,7 @@ import axios from "axios";
 import { generateRandomString, MAX_FILE_SIZE_MB } from "./index";
 import i18n from '@/i18n'
 import { getApiBaseUrl } from './api-base';
+import { createSessionRecovery, isWorkspaceFailure } from './sessionRecovery';
 
 const t = (key: string) => i18n.global.t(key)
 
@@ -20,6 +21,69 @@ const instance = axios.create({
   },
 });
 
+// Recovery uses a separate transport: no stale X-Tenant-ID and no recursive
+// interceptor/refresh queue. The server remains the authority for membership.
+const identityTransport = axios.create({ baseURL: BASE_URL, timeout: 30000 });
+function storedSessionContext() {
+  const read = (key: string) => {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; }
+  };
+  return {
+    userId: read('weknora_user')?.id || '',
+    tenantId: Number(localStorage.getItem('weknora_selected_tenant_id') || read('weknora_tenant')?.id || 0),
+  };
+}
+function sessionContextKey() {
+  const { userId, tenantId } = storedSessionContext();
+  return `${userId}/${tenantId}`;
+}
+const recovery = createSessionRecovery({
+  current: () => ({
+    token: localStorage.getItem('weknora_token') || '',
+    refreshToken: localStorage.getItem('weknora_refresh_token') || '',
+    tenantId: storedSessionContext().tenantId,
+  }),
+  async refresh(refreshToken) {
+    const { data } = await identityTransport.post('/api/v1/auth/refresh', { refreshToken });
+    if (!data.success || !data.access_token || !data.refresh_token) throw new Error('Invalid refresh response');
+    return { token: data.access_token, refreshToken: data.refresh_token };
+  },
+  async me(token, tenantId) {
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+    if (tenantId) headers['X-Tenant-ID'] = String(tenantId);
+    return (await identityTransport.get('/api/v1/auth/me', { headers })).data;
+  },
+  saveTokens({ token, refreshToken }) {
+    localStorage.setItem('weknora_token', token);
+    localStorage.setItem('weknora_refresh_token', refreshToken);
+  },
+  async apply(snapshot, reset) {
+    const { useAuthStore } = await import('@/stores/auth');
+    const { userInfoFromApi } = await import('@/api/auth');
+    const store = useAuthStore();
+    const token = localStorage.getItem('weknora_token')!;
+    const refreshToken = localStorage.getItem('weknora_refresh_token')!;
+    if (reset) store.logout();
+    store.setToken(token);
+    store.setRefreshToken(refreshToken);
+    store.setUser(userInfoFromApi(snapshot.user));
+    store.setTenant(snapshot.tenant ? { ...snapshot.tenant, id: String(snapshot.tenant.id) } : null);
+    store.setSelectedTenant(snapshot.tenant?.id ? Number(snapshot.tenant.id) : null, snapshot.tenant?.name || null);
+    store.setMemberships(snapshot.memberships || []);
+    store.setCanCreateTenant(snapshot.capabilities?.can_create_tenant === true);
+  },
+  async logout() {
+    const { useAuthStore } = await import('@/stores/auth');
+    useAuthStore().logout();
+  },
+  navigate(path) { window.location.replace(path); },
+});
+
+/** Use after a successful leave/delete; don't make a request in the lost workspace. */
+export async function recoverWorkspaceSession(): Promise<void> {
+  await recovery.recover(true);
+}
+
 // 获取当前用户语言（用于 Accept-Language header）
 function getCurrentLanguage(): string {
   return i18n.global.locale?.value || localStorage.getItem('locale') || 'zh-CN'
@@ -27,7 +91,11 @@ function getCurrentLanguage(): string {
 
 
 instance.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    await recovery.wait();
+    if (recovery.navigating) throw new axios.CanceledError('Session navigation in progress');
+    (config as any)._sessionVersion = recovery.version;
+    (config as any)._sessionContext = sessionContextKey();
     const existingAuth = config.headers?.Authorization ?? config.headers?.authorization;
     const isEmbedAuth = typeof existingAuth === 'string' && existingAuth.startsWith('Embed ');
     const isEmbedPath = typeof config.url === 'string' && config.url.includes('/api/v1/embed/');
@@ -67,10 +135,6 @@ instance.interceptors.request.use(
   }
 );
 
-// Token刷新标志，防止多个请求同时刷新token
-let isRefreshing = false;
-let failedQueue: Array<{ resolve: Function; reject: Function }> = [];
-
 // Share-link endpoints (/auth/invitations/lookup, /auth/register-by-invite)
 // are reachable by anonymous users opening an invite link. A 401 from these
 // must surface to the page (e.g. expired token), not trigger the
@@ -83,34 +147,17 @@ function isPublicAuthRequest(url?: string): boolean {
   return PUBLIC_AUTH_PATHS.some(p => url.includes(p));
 }
 
-// 处理队列中的请求
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
-  });
-  
-  failedQueue = [];
-};
-
 function isEmbedPage(): boolean {
   if (typeof window === 'undefined') return false;
   return window.location.pathname.startsWith('/embed/');
 }
 
-function redirectToLogin() {
-  if (typeof window === 'undefined') return;
-  if (window.location.pathname === '/login') return;
-  // Embed 渠道用 Embed token 鉴权，匿名访问不应被踢到登录页
-  if (isEmbedPage()) return;
-  window.location.href = '/login';
-}
-
 instance.interceptors.response.use(
   (response) => {
+    if (recovery.navigating || (response.config as any)._sessionVersion !== recovery.version ||
+        (response.config as any)._sessionContext !== sessionContextKey()) {
+      return Promise.reject(new axios.CanceledError('Discarded response from previous workspace'));
+    }
     // 根据业务状态码处理逻辑
     const { status, data } = response;
     if (status >= 200 && status < 300) {
@@ -121,6 +168,11 @@ instance.interceptors.response.use(
   },
   async (error: any) => {
     const originalRequest = error.config;
+    if (axios.isCancel(error)) return Promise.reject(error);
+    if (recovery.navigating || (originalRequest && (originalRequest._sessionVersion !== recovery.version ||
+        originalRequest._sessionContext !== sessionContextKey()))) {
+      return Promise.reject(new axios.CanceledError('Discarded request from previous workspace'));
+    }
     
     if (!error.response) {
       return Promise.reject({ message: t('error.networkError') });
@@ -144,75 +196,23 @@ instance.interceptors.response.use(
       return Promise.reject({ status, message: msg || t('error.invalidCredentials') });
     }
 
-    // 如果是401错误且不是刷新token的请求，尝试刷新token
-    if (error.response.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
-      if (isRefreshing) {
-        // 如果正在刷新token，将请求加入队列
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers['Authorization'] = 'Bearer ' + token;
-          return instance(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
-      }
-      
+    const workspaceFailure = isWorkspaceFailure(error.response.status, error.response.data);
+    const canRecover = originalRequest && !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !isPublicAuthRequest(originalRequest.url) && !isEmbedPage();
+    if (canRecover && (workspaceFailure || error.response.status === 401)) {
       originalRequest._retry = true;
-      isRefreshing = true;
-      
-      const refreshToken = localStorage.getItem('weknora_refresh_token');
-      
-      if (refreshToken) {
-        try {
-          // 动态导入refresh token API
-          const { refreshToken: refreshTokenAPI } = await import('../api/auth/index');
-          const response = await refreshTokenAPI(refreshToken);
-          
-          if (response.success && response.data) {
-            const { token, refreshToken: newRefreshToken } = response.data;
-            
-            // 更新localStorage中的token
-            localStorage.setItem('weknora_token', token);
-            localStorage.setItem('weknora_refresh_token', newRefreshToken);
-            
-            // 更新请求头
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
-            
-            // 处理队列中的请求
-            processQueue(null, token);
-            
-            return instance(originalRequest);
-          } else {
-            throw new Error(response.message || t('error.tokenRefreshFailed'));
-          }
-        } catch (refreshError) {
-          // 刷新失败，清除所有token并跳转到登录页
-          localStorage.removeItem('weknora_token');
-          localStorage.removeItem('weknora_refresh_token');
-          localStorage.removeItem('weknora_user');
-          localStorage.removeItem('weknora_tenant');
-          
-          processQueue(refreshError, null);
-          
-          redirectToLogin();
-          
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
-      } else {
-        // 没有refresh token，直接跳转到登录页
-        localStorage.removeItem('weknora_token');
-        localStorage.removeItem('weknora_user');
-        localStorage.removeItem('weknora_tenant');
-        
-        redirectToLogin();
-        
-        return Promise.reject({ message: t('error.pleaseRelogin') });
+      // A late 401 may belong to the access token just replaced by another
+      // request. Retry once with that token instead of rotating refresh twice.
+      const currentToken = localStorage.getItem('weknora_token');
+      if (!workspaceFailure && currentToken && originalRequest.headers?.Authorization !== `Bearer ${currentToken}`) {
+        return instance(originalRequest);
       }
+      const retry = await recovery.recover(workspaceFailure);
+      if (retry) return instance(originalRequest);
+      return Promise.reject(new axios.CanceledError('Session recovered; request was not replayed'));
     }
-    
+
     // 处理 Nginx 413 Request Entity Too Large
     if (error.response.status === 413) {
       return Promise.reject({ 

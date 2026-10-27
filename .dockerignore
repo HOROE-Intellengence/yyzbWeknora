@@ -55,6 +55,11 @@ test/data/mswag.txt
 # 敏感文件
 .env
 .env.lite
+.env.*
+!.env.example
+backups/
+migration-private/
+migration-bundles/
 *.pem
 *.key
 *.crt

@@ -1,0 +1,1852 @@
+[
+  {
+    "name": "register owner",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "register member",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login member",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "register outsider",
+    "method": "POST",
+    "path": "/auth/register",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "login outsider",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "create workspace",
+    "method": "POST",
+    "path": "/tenants",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "self-service rejects privileged quota/status injection",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "switch owner workspace",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "anonymous member roster denied",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 401,
+    "expected": [
+      401
+    ],
+    "pass": true,
+    "response": {
+      "error": "Unauthorized: missing authentication"
+    }
+  },
+  {
+    "name": "outsider denied ",
+    "method": "GET",
+    "path": "/tenants/10012",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Access denied: URL workspace does not match the active workspace"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider denied /members",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Access denied: URL workspace does not match the active workspace"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider denied /invitations",
+    "method": "GET",
+    "path": "/tenants/10012/invitations",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Access denied: URL workspace does not match the active workspace"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider denied /api-keys",
+    "method": "GET",
+    "path": "/tenants/10012/api-keys",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Access denied: URL workspace does not match the active workspace"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider denied /audit-log",
+    "method": "GET",
+    "path": "/tenants/10012/audit-log",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Access denied: URL workspace does not match the active workspace"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider switch denied",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": "tenant membership not found",
+        "message": "workspace switch failed"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "forged tenant header denied",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient permissions to access target workspace"
+    }
+  },
+  {
+    "name": "ordinary user platform admin denied",
+    "method": "GET",
+    "path": "/system/admin/list",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: system administrator required"
+    }
+  },
+  {
+    "name": "ordinary user global tenant list denied",
+    "method": "GET",
+    "path": "/tenants/all",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Cross-workspace access is disabled"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "last owner protection POST",
+    "method": "POST",
+    "path": "/tenants/10012/leave",
+    "status": 409,
+    "expected": [
+      409
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "cannot demote or remove the last active owner of the tenant"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "last owner protection DELETE",
+    "method": "DELETE",
+    "path": "/tenants/10012/members/555be22f-19ba-47f2-8d00-9f7b7ee2f372",
+    "status": 409,
+    "expected": [
+      409
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "cannot demote or remove the last active owner of the tenant"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "last owner protection PUT",
+    "method": "PUT",
+    "path": "/tenants/10012/members/555be22f-19ba-47f2-8d00-9f7b7ee2f372",
+    "status": 409,
+    "expected": [
+      409
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "cannot demote or remove the last active owner of the tenant"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "invite member viewer",
+    "method": "POST",
+    "path": "/tenants/10012/invitations",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "duplicate invitation",
+    "method": "POST",
+    "path": "/tenants/10012/invitations",
+    "status": 409,
+    "expected": [
+      409
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "a pending invitation for this user already exists"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "invitee inbox",
+    "method": "GET",
+    "path": "/me/invitations",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "invitee sees invitation",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "other user cannot accept invite",
+    "method": "POST",
+    "path": "/me/invitations/7/accept",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "only the invitee can accept or decline this invitation"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "invitee cannot access before accept",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": "tenant membership not found",
+        "message": "workspace switch failed"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "accept invitation",
+    "method": "POST",
+    "path": "/me/invitations/7/accept",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "accepted invite replay rejected",
+    "method": "POST",
+    "path": "/me/invitations/7/accept",
+    "status": 409,
+    "expected": [
+      400,
+      409,
+      410
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "invitation is no longer pending"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "switch member into shared workspace",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "viewer reads members",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "viewer reads settings",
+    "method": "GET",
+    "path": "/tenants/10012",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "viewer denied self promote",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied add member",
+    "method": "POST",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied invite member",
+    "method": "POST",
+    "path": "/tenants/10012/invitations",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied invite link",
+    "method": "POST",
+    "path": "/tenants/10012/invite-links",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied change workspace",
+    "method": "PUT",
+    "path": "/tenants/10012",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied create KB",
+    "method": "POST",
+    "path": "/knowledge-bases",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied list keys",
+    "method": "GET",
+    "path": "/tenants/10012/api-keys",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "viewer denied read audit",
+    "method": "GET",
+    "path": "/tenants/10012/audit-log",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "owner create KB",
+    "method": "POST",
+    "path": "/knowledge-bases",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "member reads KB",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "outsider cannot read KB",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied to access this knowledge base"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider cannot mutate KB",
+    "method": "PUT",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied to access this knowledge base"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider cannot delete KB",
+    "method": "DELETE",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied to access this knowledge base"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "outsider KB list",
+    "method": "GET",
+    "path": "/knowledge-bases",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "outsider list excludes private KB",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "promote to contributor",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "contributor cannot change colleague KB",
+    "method": "PUT",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: must own the resource or have the required role"
+    }
+  },
+  {
+    "name": "contributor creates own KB with existing token",
+    "method": "POST",
+    "path": "/knowledge-bases",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "contributor updates own KB",
+    "method": "PUT",
+    "path": "/knowledge-bases/18b31c0b-991f-4d45-920e-4d68f79170b0",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "promote to admin",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "admin cannot manage members",
+    "method": "POST",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "admin reads audit",
+    "method": "GET",
+    "path": "/tenants/10012/audit-log",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "admin updates colleague KB",
+    "method": "PUT",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "demote to viewer",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "demotion effective on existing token",
+    "method": "POST",
+    "path": "/knowledge-bases",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "remove member",
+    "method": "DELETE",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "removed member stale token denied",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      401,
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: not a member of the target workspace"
+    }
+  },
+  {
+    "name": "removed member cannot switch back",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 403,
+    "expected": [
+      401,
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: not a member of the target workspace"
+    }
+  },
+  {
+    "name": "removed member stale token cannot read KB",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      401,
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: not a member of the target workspace"
+    }
+  },
+  {
+    "name": "removed member can login home",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "direct add member",
+    "method": "POST",
+    "path": "/tenants/10012/members",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "re-added member switch",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "member leaves workspace",
+    "method": "POST",
+    "path": "/tenants/10012/leave",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "departed member token denied",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      401,
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: not a member of the target workspace"
+    }
+  },
+  {
+    "name": "departed member login home",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "create decline invitation",
+    "method": "POST",
+    "path": "/tenants/10012/invitations",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "decline invitation",
+    "method": "POST",
+    "path": "/me/invitations/8/decline",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "declined invite cannot accept",
+    "method": "POST",
+    "path": "/me/invitations/8/accept",
+    "status": 409,
+    "expected": [
+      400,
+      409,
+      410
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "invitation is no longer pending"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "create revoke invitation",
+    "method": "POST",
+    "path": "/tenants/10012/invitations",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "owner revoke invitation",
+    "method": "DELETE",
+    "path": "/tenants/10012/invitations/9",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "revoked invite cannot accept",
+    "method": "POST",
+    "path": "/me/invitations/9/accept",
+    "status": 409,
+    "expected": [
+      400,
+      409,
+      410
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1005,
+        "details": null,
+        "message": "invitation is no longer pending"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "create share invitation link",
+    "method": "POST",
+    "path": "/tenants/10012/invite-links",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "public link lookup",
+    "method": "POST",
+    "path": "/auth/invitations/lookup",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "register through invitation",
+    "method": "POST",
+    "path": "/auth/register-by-invite",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "invited account login",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "invite registration joins correct workspace as viewer",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "viewer list invitations hides bearer links",
+    "method": "GET",
+    "path": "/tenants/10012/invitations",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "invite token not disclosed to viewer",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "revoke share link",
+    "method": "DELETE",
+    "path": "/tenants/10012/invitations/10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "revoked share link lookup denied",
+    "method": "POST",
+    "path": "/auth/invitations/lookup",
+    "status": 410,
+    "expected": [
+      410
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "invitation link is invalid or has been revoked"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "revoked link registration denied",
+    "method": "POST",
+    "path": "/auth/register-by-invite",
+    "status": 410,
+    "expected": [
+      410
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "invitation link is invalid or has been revoked"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "create private chat",
+    "method": "POST",
+    "path": "/sessions",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "same workspace viewer cannot access private chat GET",
+    "method": "GET",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "same workspace viewer cannot access private chat PUT",
+    "method": "PUT",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "same workspace viewer cannot access private chat DELETE",
+    "method": "DELETE",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "same workspace viewer list chats",
+    "method": "GET",
+    "path": "/sessions",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "same workspace viewer list hides private chat",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "other workspace owner cannot access private chat GET",
+    "method": "GET",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "other workspace owner cannot access private chat PUT",
+    "method": "PUT",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "other workspace owner cannot access private chat DELETE",
+    "method": "DELETE",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 404,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1003,
+        "details": null,
+        "message": "session not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "other workspace owner list chats",
+    "method": "GET",
+    "path": "/sessions",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "other workspace owner list hides private chat",
+    "pass": true,
+    "detail": null
+  },
+  {
+    "name": "create restricted API key",
+    "method": "POST",
+    "path": "/tenants/10012/api-keys",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "scoped key reads allowed KB",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "scoped key denied other KB",
+    "method": "GET",
+    "path": "/knowledge-bases/18b31c0b-991f-4d45-920e-4d68f79170b0",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "API key scope does not allow one or more knowledge bases"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "scoped key denied member management",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: API key scope does not allow this operation"
+    }
+  },
+  {
+    "name": "revoke API key",
+    "method": "DELETE",
+    "path": "/tenants/10012/api-keys/3",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "revoked API key denied immediately",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 401,
+    "expected": [
+      401
+    ],
+    "pass": true,
+    "response": {
+      "error": "Unauthorized: invalid API key"
+    }
+  },
+  {
+    "name": "create shared organization",
+    "method": "POST",
+    "path": "/organizations",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "outsider cannot see organization members",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/members",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Your workspace is not a member of this organization"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "disable join approval for test organization",
+    "method": "PUT",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "join organization by code",
+    "method": "POST",
+    "path": "/organizations/join",
+    "status": 200,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "organization viewer cannot change settings",
+    "method": "PUT",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied or organization not found"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "share KB read-only",
+    "method": "POST",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10/shares",
+    "status": 201,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "shared KB now readable across workspaces",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "read-only share cannot write KB",
+    "method": "PUT",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied to access this knowledge base"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "remove organization member",
+    "method": "DELETE",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/members/10011",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "removed org member loses KB access",
+    "method": "GET",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Permission denied to access this knowledge base"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "remove KB share",
+    "method": "DELETE",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10/shares/b731641c-55f7-45c0-ad9f-4891e4215178",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "logout outsider",
+    "method": "POST",
+    "path": "/auth/logout",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "logged out access token denied",
+    "method": "GET",
+    "path": "/auth/me",
+    "status": 401,
+    "expected": [
+      401
+    ],
+    "pass": true,
+    "response": {
+      "error": "Unauthorized: invalid or expired token"
+    }
+  },
+  {
+    "name": "logged out refresh token denied",
+    "method": "POST",
+    "path": "/auth/refresh",
+    "status": 401,
+    "expected": [
+      401
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1001,
+        "details": "refresh token is revoked",
+        "message": "Token refresh failed"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "add member for ownership regression",
+    "method": "POST",
+    "path": "/tenants/10012/members",
+    "status": 201,
+    "expected": [
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "relogin for final validation",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "relogin for final validation",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "relogin for final validation",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "switch for ownership transfer",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "switch for ownership transfer",
+    "method": "POST",
+    "path": "/auth/switch-tenant",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "add second owner",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "original owner can demote when another exists",
+    "method": "PUT",
+    "path": "/tenants/10012/members/555be22f-19ba-47f2-8d00-9f7b7ee2f372",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "old owner loses member management immediately",
+    "method": "PUT",
+    "path": "/tenants/10012/members/555be22f-19ba-47f2-8d00-9f7b7ee2f372",
+    "status": 403,
+    "expected": [
+      403
+    ],
+    "pass": true,
+    "response": {
+      "error": "Forbidden: insufficient workspace role"
+    }
+  },
+  {
+    "name": "new owner can restore original owner",
+    "method": "PUT",
+    "path": "/tenants/10012/members/555be22f-19ba-47f2-8d00-9f7b7ee2f372",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "restore member contributor",
+    "method": "PUT",
+    "path": "/tenants/10012/members/f730da6c-414e-48aa-831c-a3b3d53bee01",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "refresh token works before logout",
+    "method": "POST",
+    "path": "/auth/refresh",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "rotated refresh token replay denied",
+    "method": "POST",
+    "path": "/auth/refresh",
+    "status": 401,
+    "expected": [
+      401
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1001,
+        "details": "refresh token is revoked",
+        "message": "Token refresh failed"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "enable organization join approval",
+    "method": "PUT",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "read test organization",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "submit organization join request",
+    "method": "POST",
+    "path": "/organizations/join-request",
+    "status": 200,
+    "expected": [
+      200,
+      201
+    ],
+    "pass": true
+  },
+  {
+    "name": "pending org applicant cannot read members",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/members",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Your workspace is not a member of this organization"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "owner sees join requests",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/join-requests",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "approve organization join request",
+    "method": "PUT",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/join-requests/30ff0012-a0d0-403e-a2c4-fea65b70dd51/review",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "approved organization member reads roster",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/members",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "organization member leaves",
+    "method": "POST",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/leave",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "left organization access denied",
+    "method": "GET",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8/members",
+    "status": 403,
+    "expected": [
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": {
+        "code": 1002,
+        "details": null,
+        "message": "Your workspace is not a member of this organization"
+      },
+      "success": false
+    }
+  },
+  {
+    "name": "delete test chat",
+    "method": "DELETE",
+    "path": "/sessions/b0ee4e20-d42d-4307-86b4-48072f9a162a",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete test kb",
+    "method": "DELETE",
+    "path": "/knowledge-bases/acfffde3-3041-4099-9d25-b83144ea4e10",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete test member_kb",
+    "method": "DELETE",
+    "path": "/knowledge-bases/18b31c0b-991f-4d45-920e-4d68f79170b0",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete test organization",
+    "method": "DELETE",
+    "path": "/organizations/5d488007-87f5-4d18-a3fd-d3b9d312dbc8",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete test shared workspace",
+    "method": "DELETE",
+    "path": "/tenants/10012",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "deleted workspace rejects old token",
+    "method": "GET",
+    "path": "/tenants/10012/members",
+    "status": 401,
+    "expected": [
+      401,
+      403,
+      404
+    ],
+    "pass": true,
+    "response": {
+      "error": "Unauthorized: invalid workspace"
+    }
+  },
+  {
+    "name": "login after shared workspace deletion owner",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete disposable home owner",
+    "method": "DELETE",
+    "path": "/tenants/10009",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login after shared workspace deletion member",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete disposable home member",
+    "method": "DELETE",
+    "path": "/tenants/10010",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "login after shared workspace deletion outsider",
+    "method": "POST",
+    "path": "/auth/login",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  },
+  {
+    "name": "delete disposable home outsider",
+    "method": "DELETE",
+    "path": "/tenants/10011",
+    "status": 200,
+    "expected": [
+      200
+    ],
+    "pass": true
+  }
+]

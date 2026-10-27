@@ -1,0 +1,21 @@
+FROM golang:1.26 AS toolchain
+FROM weknora-app:before-session-recovery-20260916 AS builder
+COPY --from=toolchain /usr/local/go /usr/local/go
+ENV PATH="/usr/local/go/bin:${PATH}"
+ENV GOPROXY="https://proxy.golang.org,direct"
+ENV GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
+WORKDIR /app
+COPY go.mod go.sum Makefile ./
+COPY cmd ./cmd
+COPY internal ./internal
+COPY docs ./docs
+COPY docreader/client ./docreader/client
+COPY docreader/proto ./docreader/proto
+RUN cp -a /home/appuser/.duckdb /root/.duckdb
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build go test ./internal/application/service -run 'Test(HomeTenantRecovery|ResolveLoginTenantID|ValidateToken|RefreshToken|UserServiceRegisterTenantless)' -count=1
+RUN apt-get update && apt-get install -y --no-install-recommends libsqlite3-dev
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build make build-prod
+FROM weknora-app:before-session-recovery-20260916
+COPY --from=builder /app/WeKnora /app/WeKnora
+COPY --from=builder /root/go/pkg/mod/github.com/yanyiwu/gojieba@v1.4.7/deps/cppjieba/dict /app/jieba-dict
+ENV JIEBA_DICT_DIR=/app/jieba-dict

@@ -1,0 +1,2 @@
+FROM weknora-ui:before-session-recovery-20260916
+COPY frontend/dist /usr/share/nginx/html

@@ -1,0 +1,19 @@
+BEGIN
+UPDATE 38
+UPDATE 4
+UPDATE 0
+COMMIT
+     ?column?      | count
+-------------------+-------
+ active_test_users |     0
+(1 row)
+
+        ?column?        | count
+------------------------+-------
+ active_test_workspaces |     0
+(1 row)
+
+        ?column?         | count
+-------------------------+-------
+ active_test_memberships |     0
+(1 row)

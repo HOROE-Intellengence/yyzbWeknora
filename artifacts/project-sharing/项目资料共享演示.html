@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>个人、部门与项目共享</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f7f2;color:#222824;font-family:"Microsoft YaHei",system-ui,sans-serif}main{max-width:1200px;margin:auto;padding:30px 30px 20px}header{display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:30px;letter-spacing:-1px;margin:0 0 8px}header p{margin:0;color:#6b736c;font-size:14px}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#556057}.legend span{display:flex;align-items:center;gap:7px}.key{display:inline-block;width:15px;height:15px;border-radius:3px;background:#2eb675}.key.black{background:#292e2b}.key.ball{border-radius:50%}.theater{margin-top:22px;background:#fff;border:1px solid #e3e8df;border-radius:24px;overflow:hidden;position:relative}.scroller{overflow-x:auto}svg{display:block;width:100%;height:auto;min-width:740px;font-family:inherit}svg text{fill:#37463c;font-size:15px}svg .label{font-size:17px;font-weight:bold}svg .small{font-size:12px;fill:#7b877c}svg .white{fill:#fff}.scene-label{position:absolute;top:20px;left:24px;font-size:12px;letter-spacing:2px;color:#718375;pointer-events:none}.caption{padding:19px 24px;background:#edf4eb;display:flex;gap:15px;align-items:center;min-height:88px}.count{font-size:32px;color:#76a186;font-weight:300}.caption h2{margin:0;font-size:20px}.caption p{margin:5px 0 0;color:#5a6e5e;font-size:13px;line-height:1.6}.timeline{display:flex;gap:8px;margin-top:18px}.step{flex:1;background:#e8ede4;color:#62705f;border:0;border-radius:10px;padding:12px 6px;font:inherit;font-size:13px;cursor:pointer}.step[aria-current=step]{background:#263d2d;color:#fff}.controls{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:12px}.buttons{display:flex;gap:8px}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #dc9d30;outline-offset:3px}.action{border:1px solid #d8e1d3;background:transparent;border-radius:30px;padding:10px 20px;font-size:13px;color:#3b553e}.primary{background:#2a593b;border-color:#2a593b;color:white}.action:disabled{opacity:.35;cursor:default}.track{height:3px;background:#dfe8d9;flex:1;max-width:330px;overflow:hidden;border-radius:5px}.track div{height:100%;background:#3c9160;width:0}.foot{font-size:11px;color:#7a8477;line-height:1.8;margin:16px 0 0}.mobile-hint{display:none}@media(max-width:750px){main{padding:22px 14px}header{display:block}h1{font-size:26px}.legend{margin-top:18px;gap:10px;font-size:11px}.timeline{flex-wrap:wrap}.step{flex:1 1 28%;font-size:12px}.caption{padding:16px;align-items:flex-start}.caption h2{font-size:17px}.track{display:none}.mobile-hint{display:block;color:#879080;font-size:11px;margin:8px 4px}.scene-label{font-size:10px}.action{padding:10px 16px}}
+</style></head>
+<body><main><header><div><h1>个人、部门与项目共享</h1><p>资料放在哪里，决定谁能访问。</p></div><div class="legend"><span><i class="key"></i>个人空间</span><span><i class="key black"></i>部门空间</span><span><i class="key ball black"></i>未共享的库</span><span><i class="key ball"></i>已共享的库</span></div></header>
+<div class="theater"><div class="scene-label" id="scene-label">01 / 个人空间</div><div class="scroller"><svg id="stage" viewBox="0 0 1200 650" role="img" aria-labelledby="svgtitle svgdesc"><title id="svgtitle">小人和空间展示知识库共享</title><desc id="svgdesc">绿色空间代表只有本人的个人工作空间，黑色空间代表部门工作空间。</desc>
+<defs><filter id="shadow" x="-70%" y="-50%" width="240%" height="240%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#143b20" flood-opacity=".15"/></filter><radialGradient id="greenball" cx="30%" cy="20%"><stop offset="0" stop-color="#75e8a6"/><stop offset="1" stop-color="#22a566"/></radialGradient><radialGradient id="blackball" cx="30%" cy="20%"><stop offset="0" stop-color="#65716a"/><stop offset="1" stop-color="#232a26"/></radialGradient></defs>
+<path d="M30 600H1170" stroke="#edf0e9" stroke-width="2"/>
+<g id="project"><ellipse cx="570" cy="320" rx="147" ry="135" fill="#eef8ed" stroke="#89bc91" stroke-width="2" stroke-dasharray="7 7"/><text x="570" y="258" text-anchor="middle" class="label">共享空间</text><text x="570" y="278" text-anchor="middle" class="small">承做李四维护</text><text id="circle-note" x="570" y="389" text-anchor="middle" class="small">只开放指定知识库</text></g>
+<g id="connections"></g><g id="boxes"></g><g id="balls"></g><g id="people"></g><g id="noentry"><circle r="15" fill="#fff" stroke="#aab6aa" stroke-width="2"/><path d="M-8 0H8" stroke="#aab6aa" stroke-width="3"/></g><text x="180" y="363" text-anchor="middle" class="small">项目B未共享</text>
+</svg></div><div class="caption" aria-live="polite"><span class="count" id="count">01</span><div><h2 id="caption"></h2><p id="detail"></p></div></div></div><div class="mobile-hint">左右滑动画面，可查看所有人员和空间。</div>
+<nav class="timeline" aria-label="选择动画情节"></nav><div class="controls"><div class="buttons"><button class="action primary" id="play">暂停</button><button class="action" id="prev">上一步</button><button class="action" id="next">下一步</button><button class="action" id="replay">重播</button></div><div class="track"><div id="progress"></div></div></div>
+<p class="foot">绿色为个人空间，黑色为部门空间；球代表整个知识库。人物靠近表示获得访问权限，部门空间始终固定。<br>共享球的原库仍在来源空间中。黑球只表示“未对外共享”，放在部门空间里仍可供本部门成员读取。撤权不收回已下载文件，也不取消其他路径的授权。</p>
+</main><script>
+const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function group(id,parent,markup){const g=document.createElementNS(NS,'g');g.id=id;g.innerHTML=markup;$(parent).appendChild(g);return g}
+const boxMarkup=(name,dark=false)=>`<ellipse cx="0" cy="40" rx="72" ry="10" fill="#192e2010"/><path d="M-70-24 L0-40 L70-24 L0-7 Z" fill="${dark?'#59615b':'#83d9a5'}"/><path d="M-70-24V35L0 53V-7Z" fill="${dark?'#292e2b':'#2fb772'}"/><path d="M0-7V53L70 35V-24Z" fill="${dark?'#1b211d':'#229359'}"/><path d="M-70-24L0-7L70-24" stroke="#ffffff65" fill="none"/><text y="79" text-anchor="middle" class="label">${name}</text>`;
+const entities={},make=(id,parent,markup,x,y)=>{const el=group(id,parent,markup);entities[id]={el,x,y,tx:x,ty:y,alpha:1,ta:1};return el};
+make('liBox','boxes',boxMarkup('李四的个人空间'),180,260);
+make('zhangBox','boxes',boxMarkup('张三的个人空间'),950,260);
+make('wangBox','boxes',boxMarkup('王五的个人空间'),950,500);
+make('deptBox','boxes',boxMarkup('承揽部门空间',true),950,90);
+make('liDept','boxes',boxMarkup('承做部门空间',true),180,90);
+make('wangDept','boxes',boxMarkup('承销部门空间',true),1120,365);
+function person(id,name,role,x,y){make(id,'people',`<ellipse cy="41" rx="21" ry="5" fill="#102d2010"/><g class="body" fill="#344d40" stroke="#344d40"><circle cy="-24" r="11" stroke="none"/><rect x="-12" y="-7" width="24" height="27" rx="8" stroke="none"/><path d="M-11-1L-21 17M11-1L21 17" stroke-width="7" stroke-linecap="round"/><path class="legs" d="M-6 16L-9 36M6 16L9 36" stroke-width="8" stroke-linecap="round"/></g><text y="61" text-anchor="middle" class="label">${name}</text><text y="79" text-anchor="middle" class="small">${role}</text>`,x,y)}
+person('li','李四','承做 · 管理项目',75,240);person('zhang','张三','承揽',1080,240);person('wang','王五','承销',1080,510);person('zhao','赵六','承揽同事',1100,75);
+function ball(id,label,x,y){make(id,'balls',`<circle r="24" fill="url(#blackball)" filter="url(#shadow)"/><circle class="green" r="24" fill="url(#greenball)" style="opacity:0;transition:opacity 1s"/><text text-anchor="middle" y="6" class="white" style="font-size:12px">${label}</text>`,x,y)}
+ball('a','项目A',153,247);ball('b','项目B',208,255);ball('d','部门库',950,77);
+group('origin','balls','<circle cx="153" cy="247" r="23" fill="none" stroke="#178852" stroke-width="2" stroke-dasharray="4 4"/><text x="153" y="252" text-anchor="middle" style="fill:#178852;font-size:12px">原库</text>');
+['sourceLine','zhangLine','wangLine','deptLine'].forEach(id=>group(id,'connections','<path fill="none" stroke="#71b487" stroke-width="2" stroke-dasharray="5 6"/>'));
+const scenes=[
+['个人空间','个人空间只有本人，未共享的资料仅本人可见。','李四分别维护项目A、项目B两个知识库。'],
+['部门空间','部门空间里的资料，部门成员都能读取。','张三和赵六都是承揽部门成员；部门知识库不必另行共享给他们。'],
+['共享项目A','李四将项目A共享，知识库由黑色变为绿色。','原库仍归李四维护；项目B保持未共享。'],
+['个人加入','张三、王五用个人空间加入，获得项目访问权限。','部门空间留在原处，其他同事不会自动获得权限。'],
+['部门加入','如果加入的是部门空间，同事也会获得访问权限。','本幕只改变承揽部门的授权关系；部门空间本身不移动。'],
+['退出项目','移除王五的个人空间，撤销这条项目授权。','恢复个人授权方案：张三继续访问，王五和赵六不能通过此共享空间访问。']];
+let scene=0,playing=!reduced,elapsed=0,last=0;const duration=8500;
+document.querySelector('.timeline').innerHTML=scenes.map((s,i)=>`<button class="step" data-index="${i}">${i+1}. ${s[0]}</button>`).join('');
+function target(id,x,y,alpha=1){Object.assign(entities[id],{tx:x,ty:y,ta:alpha})}
+function setScene(n){scene=n;elapsed=0;
+target('liBox',180,260);target('zhangBox',950,260);target('wangBox',950,500);
+target('li',75,240);target('zhang',1080,240);target('wang',1080,510);target('zhao',1100,75);
+target('a',153,247);target('b',208,255);target('d',950,77);
+if(n===1){target('zhang',825,90);target('zhao',1080,90);target('d',950,47)}
+if(n>=2){target('a',570,330);target('li',380,320)}
+if(n===3||n===5){target('zhangBox',850,230);target('zhang',745,235)}
+if(n===3||n===4){target('wangBox',850,490);target('wang',745,425)}
+if(n===4){target('zhang',695,210);target('zhao',770,300);target('zhangBox',950,260,.25)}
+$('project').style.opacity=n>=2?1:.18;$('origin').style.opacity=n>=2?1:0;$('a').querySelector('.green').style.opacity=n>=2?1:0;
+$('sourceLine').style.opacity=n>=2?1:0;$('zhangLine').style.opacity=(n===3||n===5)?1:0;$('wangLine').style.opacity=(n===3||n===4)?1:0;$('deptLine').style.opacity=n===4?1:0;
+$('noentry').style.opacity=(n===3||n===5)?1:0;$('noentry').setAttribute('transform',n===5?'translate(902 422)':'translate(1030 169)');
+$('circle-note').textContent=n===4?'部门空间加入 → 部门成员也可访问':'只开放指定知识库';$('scene-label').textContent=`0${n+1} / ${scenes[n][0]}`;$('count').textContent=`0${n+1}`;$('caption').textContent=scenes[n][1];$('detail').textContent=scenes[n][2];$('svgdesc').textContent=scenes[n][1]+scenes[n][2];
+document.querySelectorAll('.step').forEach((b,i)=>{if(i===n)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});$('prev').disabled=n===0;$('next').disabled=n===5;syncPlay()}
+function syncPlay(){$('play').textContent=playing?'暂停':'播放';$('play').setAttribute('aria-pressed',String(playing))}
+function path(id,from,to){const a=entities[from],b=entities[to];$(id).firstElementChild.setAttribute('d',`M${a.x} ${a.y} Q${(a.x+b.x)/2} ${Math.min(a.y,b.y)-28} ${b.x} ${b.y}`)}
+function frame(t){const dt=last?Math.min(t-last,80):16;last=t;const k=reduced?1:1-Math.exp(-dt/280);Object.entries(entities).forEach(([id,e])=>{const moving=Math.hypot(e.tx-e.x,e.ty-e.y)>1;e.x+=(e.tx-e.x)*k;e.y+=(e.ty-e.y)*k;e.alpha+=(e.ta-e.alpha)*k;e.el.setAttribute('transform',`translate(${e.x.toFixed(2)} ${e.y.toFixed(2)})`);e.el.style.opacity=e.alpha;const body=e.el.querySelector('.body');if(body){body.setAttribute('transform',`translate(0 ${moving&&!reduced?Math.sin(t/75)*2:0})`);const stride=moving&&!reduced?Math.sin(t/95)*8:0;e.el.querySelector('.legs').setAttribute('d',`M-6 16L${-9+stride} 36M6 16L${9-stride} 36`)}});path('sourceLine','liBox','a');path('zhangLine','zhangBox','a');path('wangLine','wangBox','a');path('deptLine','deptBox','a');if(playing){elapsed+=dt;if(elapsed>=duration){if(scene<5)setScene(scene+1);else{playing=false;syncPlay();elapsed=duration}}}$('progress').style.width=`${elapsed/duration*100}%`;requestAnimationFrame(frame)}
+document.querySelectorAll('.step').forEach(b=>b.onclick=()=>{playing=false;setScene(Number(b.dataset.index))});$('prev').onclick=()=>{playing=false;setScene(Math.max(0,scene-1))};$('next').onclick=()=>{playing=false;setScene(Math.min(5,scene+1))};$('play').onclick=()=>{playing=!playing;if(playing&&scene===5&&elapsed>=duration)setScene(0);syncPlay()};$('replay').onclick=()=>{playing=true;setScene(0)};document.addEventListener('visibilitychange',()=>{last=0});setScene(0);requestAnimationFrame(frame);
+</script></body></html>

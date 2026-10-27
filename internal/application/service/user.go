@@ -783,7 +783,47 @@ func (s *userService) homeOrFirstMembershipTenant(ctx context.Context, user *typ
 	if user.TenantID == 0 {
 		return s.resolveFirstMembershipTenant(ctx, user)
 	}
-	return user.TenantID
+	// A home workspace can be soft-deleted, or its last membership revoked.
+	// Do not keep minting tokens for that stale home: the frontend cannot
+	// recover an identity if even /auth/me remains scoped to it.
+	if s.memberService == nil {
+		return user.TenantID // legacy fixtures without membership support
+	}
+	members, err := s.memberService.ListByUser(ctx, user.ID)
+	if err != nil {
+		return user.TenantID // an outage is not evidence of revoked membership
+	}
+	homeActive := user.CanAccessAllTenants
+	for _, member := range members {
+		if member != nil && member.TenantID == user.TenantID && member.Status == types.TenantMemberStatusActive {
+			homeActive = true
+			break
+		}
+	}
+	if homeActive && s.tenantService != nil {
+		_, err := s.tenantService.GetTenantByID(ctx, user.TenantID)
+		if err != nil && !errors.Is(err, apprepo.ErrTenantNotFound) {
+			return user.TenantID
+		}
+		homeActive = err == nil
+	}
+	if homeActive {
+		return user.TenantID
+	}
+	previous := user.TenantID
+	user.TenantID = 0
+	if next := s.resolveFirstMembershipTenant(ctx, user); next != 0 {
+		return next
+	}
+	// NULL is the existing tenantless identity contract; UpdateUser handles
+	// the nullable FK. Persist it so middleware does not fall back to stale home.
+	if s.userRepo != nil {
+		if err := s.userRepo.UpdateUser(ctx, user); err != nil {
+			user.TenantID = previous
+			return previous
+		}
+	}
+	return 0
 }
 
 // resolveFirstMembershipTenant makes a tenantless identity usable when an

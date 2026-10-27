@@ -1,0 +1,44 @@
+# config/builtin_models.yaml — declarative built-in models.
+# See docs/BUILTIN_MODELS.md. Values come from .env via ${NAME} interpolation.
+
+builtin_models:
+  - id: builtin-embedding-qwen3
+    name: ${EMBEDDING_MODEL_NAME}
+    type: Embedding
+    source: remote
+    description: 阿里云百炼 qwen3.7-text-embedding（DashScope OpenAI 兼容模式）
+    is_default: true
+    parameters:
+      base_url: ${EMBEDDING_BASE_URL}
+      api_key: ${EMBEDDING_API_KEY}
+      provider: ${EMBEDDING_PROVIDER}
+      embedding_parameters:
+        dimension: 1024
+        truncate_prompt_tokens: 0
+
+  - id: builtin-embedding-gemini
+    name: ${GEMINI_EMBEDDING_MODEL_NAME}
+    type: Embedding
+    source: remote
+    description: Google gemini-embedding-2（原生 3072 维，按 MRL 截断到 1024 以复用 HNSW 索引）
+    is_default: false
+    parameters:
+      base_url: ${GEMINI_EMBEDDING_BASE_URL}
+      api_key: ${GEMINI_EMBEDDING_API_KEY}
+      provider: ${GEMINI_EMBEDDING_PROVIDER}
+      embedding_parameters:
+        dimension: 1024
+        truncate_prompt_tokens: 0
+        supports_dimension_override: true
+
+  - id: builtin-rerank-qwen3-vl
+    name: ${RERANK_MODEL_NAME}
+    type: Rerank
+    source: remote
+    description: 阿里云百炼 qwen3-vl-rerank（DashScope 原生多模态重排 API）
+    is_default: false
+    parameters:
+      base_url: ${RERANK_BASE_URL}
+      # 复用已验证可用的 DashScope 凭证；如需单独密钥，可替换为 ${RERANK_API_KEY}。
+      api_key: ${EMBEDDING_API_KEY}
+      provider: ${RERANK_PROVIDER}

@@ -388,6 +388,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = () => {
+    clearTenantScopedClientState()
     // 清空状态
     user.value = null
     tenant.value = null

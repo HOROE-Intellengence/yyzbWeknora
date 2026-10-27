@@ -19,10 +19,12 @@
             @change="handleLanguageChange"
             style="width: 280px;"
           >
-            <t-option value="zh-CN" :label="$t('language.zhCN')">{{ $t('language.zhCN') }}</t-option>
-            <t-option value="en-US" :label="$t('language.enUS')">{{ $t('language.enUS') }}</t-option>
-            <t-option value="ru-RU" :label="$t('language.ruRU')">{{ $t('language.ruRU') }}</t-option>
-            <t-option value="ko-KR" :label="$t('language.koKR')">{{ $t('language.koKR') }}</t-option>
+            <t-option
+              v-for="opt in languageOptions"
+              :key="opt.value"
+              :value="opt.value"
+              :label="$t(opt.labelKey)"
+            >{{ $t(opt.labelKey) }}</t-option>
           </t-select>
         </div>
       </div>
@@ -141,6 +143,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { useI18n } from 'vue-i18n'
+import { ENABLED_UI_LOCALES } from '@/i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeMode } from '@/composables/useTheme'
@@ -167,6 +170,15 @@ const {
   setMonoFont,
   setFontSize,
 } = useFont()
+
+// 语言选项：按 ENABLED_UI_LOCALES 过滤，未启用的语言不出现在下拉里。
+const ALL_LANGUAGE_OPTIONS = [
+  { value: 'zh-CN', labelKey: 'language.zhCN' },
+  { value: 'en-US', labelKey: 'language.enUS' },
+  { value: 'ru-RU', labelKey: 'language.ruRU' },
+  { value: 'ko-KR', labelKey: 'language.koKR' },
+]
+const languageOptions = ALL_LANGUAGE_OPTIONS.filter((o) => ENABLED_UI_LOCALES.includes(o.value))
 
 // 本地状态
 const localLanguage = ref('zh-CN')
@@ -222,11 +234,15 @@ const isAutoCheckUpdateEnabled = computed({
 onMounted(() => {
   // 从 localStorage 加载语言设置
   const savedLocale = localStorage.getItem('locale')
-  if (savedLocale) {
+  if (savedLocale && ENABLED_UI_LOCALES.includes(savedLocale)) {
     localLanguage.value = savedLocale
     locale.value = savedLocale
   } else {
-    localLanguage.value = locale.value
+    // 保存的语言已不在白名单里（或从未设置过）时，回落到第一个可用语言
+    localLanguage.value = ENABLED_UI_LOCALES.includes(locale.value)
+      ? locale.value
+      : ENABLED_UI_LOCALES[0]
+    locale.value = localLanguage.value
   }
 })
 

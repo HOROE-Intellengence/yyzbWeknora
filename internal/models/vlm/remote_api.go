@@ -143,6 +143,17 @@ func (v *RemoteAPIVLM) Predict(ctx context.Context, imgBytesList [][]byte, promp
 		MaxTokens:   defaultMaxToks,
 		Temperature: v.temperature,
 	}
+	// GPT-5 and OpenAI reasoning models reject the legacy max_tokens field
+	// (and sampling parameters such as temperature). Keep VLM requests aligned
+	// with the chat-model adapter so image OCR works with the same models.
+	if provider.IsOpenAIReasoningOrGPT5Model(v.modelName) {
+		req.MaxCompletionTokens = req.MaxTokens
+		req.MaxTokens = 0
+		req.Temperature = 0
+		req.TopP = 0
+		req.FrequencyPenalty = 0
+		req.PresencePenalty = 0
+	}
 
 	totalImageSize := 0
 	for _, img := range imgBytesList {

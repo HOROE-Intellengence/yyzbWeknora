@@ -1,0 +1,34 @@
+{
+  "run": "qa0916022642",
+  "accounts": [
+    {
+      "id": "033eedcc-99c2-4fd2-a3ab-1043a6ad06b0",
+      "email": "qa0916022642.owner@example.invalid"
+    },
+    {
+      "id": "9968910f-cd32-44e6-a3d4-8aa76e1c479d",
+      "email": "qa0916022642.member@example.invalid"
+    },
+    {
+      "id": "62c77fd5-0c51-4998-9502-eaa37f7827dc",
+      "email": "qa0916022642.outsider@example.invalid"
+    },
+    {
+      "id": "069e6347-838f-4a27-8457-99510a2fc4a0",
+      "email": "qa0916022642.invited@example.invalid"
+    }
+  ],
+  "workspaces": [
+    10001,
+    10002,
+    10003,
+    10004
+  ],
+  "kb_ids": [
+    "e4c6c07e-8539-45d9-94de-91198d54a7f8",
+    "b57657a5-7ea5-423f-af52-6f157ed663bc"
+  ],
+  "org_id": "aef97621-bea5-4ade-88cf-a32e83201f4b",
+  "session_id": "f5ad4804-6ae8-4623-aee2-c4efac614da4",
+  "cleanup": "API deleted fixtures; test users disabled and soft deleted; membership rows soft deleted; auth tokens revoked; audit retained"
+}
