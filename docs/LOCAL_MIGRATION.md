@@ -27,7 +27,7 @@ python scripts/migration/migrate.py rehearsal --package C:/private/weknora-trans
 
 | 文件 | 用途 |
 | --- | --- |
-| `source.bundle` | 本地提交及所需 Git 历史，可离线 clone，无需 push |
+| `source.bundle`、`source.shallow`、`checkout.py` | 本地提交、可用 Git 历史和浅克隆边界；使用配套脚本离线检出，无需 push |
 | `config/.env` | 原部署的环境变量和密钥；保留 JWT/加密相关配置才能正确读取原数据 |
 | `config/config.yaml`、`config/builtin_models.yaml` | 当前模型与应用配置 |
 | `database.dump` | 新鲜 PostgreSQL custom-format 备份，包含数据库数据、扩展和向量索引定义 |
@@ -49,10 +49,11 @@ python scripts/migration/migrate.py rehearsal --package C:/private/weknora-trans
 
 1. 安装 Git、Python 3.12+、Docker/Compose v2，将完整私有迁移目录通过受控介质复制过去。
 2. 确保为 Linux x86-64 容器环境，磁盘容纳解包后的镜像、数据库索引及全部文件。ARM 主机需要单独适配。
-3. 在一个全新的目录离线检出源码；本次 bundle 的分支为 `main`：
+3. 在一个不存在的新目录离线检出源码。本机原仓库为浅克隆，直接 `git clone source.bundle` 会缺失历史边界；
+   配套脚本仅导入可达对象和浅克隆边界，不复制源机 `.git` 中可能含旧凭据的不可达对象：
 
    ```powershell
-   git clone --branch main C:/private/weknora-transfer/source.bundle C:/work/weknora
+   python C:/private/weknora-transfer/checkout.py --package C:/private/weknora-transfer --destination C:/work/weknora
    cd C:/work/weknora
    python scripts/migration/migrate.py verify --package C:/private/weknora-transfer
    python scripts/migration/migrate.py restore --package C:/private/weknora-transfer --project weknora
@@ -85,4 +86,8 @@ python scripts/migration/migrate.py rehearsal --package C:/private/weknora-trans
 - 源机在导出后继续接受的写入不在该快照中；最终切换前应停止写入并重新导出新包。不要把本次准备快照当成未来切换时的最新状态。
 - 确认目标环境验收通过前保留源环境和本包。工具不执行 `docker compose down -v`，不删除旧数据卷。
 
-当前远程仍指向腾讯原仓库，迁移工具不会修改远程或执行 push。以后需要在线推送时，先设置我们的独立远程。
+当前源仓库远程仍指向腾讯原仓库，迁移工具不会修改远程或执行 push；离线检出不设置任何远程。
+以后在线推送前先设置我们的独立远程。若使用全新空远程仓库，先补全上游历史；不要用强推绕过浅克隆缺失历史的问题。
+
+若只修正迁移脚本或说明、未改变应用和数据，可在提交后运行 `seal --package ...` 更新源码包及校验清单，
+无需再次暂停服务。清单保留最初快照提交，操作记录和验收报告与不可变的数据载荷分开保存。

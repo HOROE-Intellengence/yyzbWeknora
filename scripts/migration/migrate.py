@@ -130,6 +130,39 @@ def archive_check(path):
     return {"files": files, "bytes": size}
 
 
+def source_payload(package):
+    branch = run("git", "symbolic-ref", "--short", "HEAD").decode().strip()
+    run("git", "bundle", "create", str(package / "source.bundle"), branch)
+    shallow = run("git", "rev-parse", "--git-path", "shallow").decode().strip()
+    if run("git", "rev-parse", "--is-shallow-repository").strip() == b"true":
+        shutil.copy2(ROOT / shallow, package / "source.shallow")
+    shutil.copy2(ROOT / "docs/LOCAL_MIGRATION.md", package / "README.md")
+    shutil.copy2(ROOT / "scripts/migration/checkout.py", package / "checkout.py")
+    shutil.copy2(Path(__file__), package / "migrate.py.reference")
+    return {"source_commit": run("git", "rev-parse", "HEAD").decode().strip(),
+            "source_branch": branch}
+
+
+def seal(package, manifest=None):
+    if run("git", "status", "--porcelain").strip():
+        raise RuntimeError("Commit source changes before sealing the package")
+    if manifest is None:
+        manifest = json.loads((package / "manifest.private.json").read_text(encoding="utf-8"))
+        manifest.setdefault("snapshot_source_commit", manifest["source_commit"])
+    manifest.update(source_payload(package))
+    manifest["code_sealed_at"] = datetime.now(timezone.utc).isoformat()
+    manifest["files"] = {}
+    mutable = {"manifest.private.json", "MANIFEST.sha256", "operations.private.log",
+               "restore-check.private.json", "PREPARATION.md"}
+    for path in sorted(package.rglob("*")):
+        if path.is_file() and path.name not in mutable and not path.name.startswith("compose.restore-"):
+            manifest["files"][path.relative_to(package).as_posix()] = {
+                "bytes": path.stat().st_size, "sha256": digest(path)}
+    write_json(package / "manifest.private.json", manifest)
+    (package / "MANIFEST.sha256").write_text(digest(package / "manifest.private.json") + "\n", encoding="ascii")
+    print("Source bundle, shallow boundary and payload checksums sealed", flush=True)
+
+
 def export(package):
     private_dir(package)
     global LOG
@@ -210,24 +243,14 @@ def export(package):
     print("Saving the five exact runtime images (no registry access)...", flush=True)
     docker("image", "save", "--output", str(package / "images.tar"),
            *dict.fromkeys(v["id"] for v in images.values()))
-    branch = run("git", "symbolic-ref", "--short", "HEAD").decode().strip()
-    run("git", "bundle", "create", str(package / "source.bundle"), branch)
-    shutil.copy2(ROOT / "docs/LOCAL_MIGRATION.md", package / "README.md")
-    shutil.copy2(Path(__file__), package / "migrate.py.reference")
     manifest = {
         "format": 1, "created_at": datetime.now(timezone.utc).isoformat(),
-        "source_commit": run("git", "rev-parse", "HEAD").decode().strip(), "source_branch": branch,
         "source_project": "weknora", "platform": "linux/amd64", "images": images,
         "table_counts": table_counts, "redis_keyspace": redis_info,
         "archives": {p.name: archive_check(p) for p in sorted(package.glob("*.tar.gz"))},
         "files": {},
     }
-    for path in sorted(package.rglob("*")):
-        if path.is_file() and path != LOG:
-            manifest["files"][path.relative_to(package).as_posix()] = {
-                "bytes": path.stat().st_size, "sha256": digest(path)}
-    write_json(package / "manifest.private.json", manifest)
-    (package / "MANIFEST.sha256").write_text(digest(package / "manifest.private.json") + "\n", encoding="ascii")
+    seal(package, manifest)
     print(f"Export complete: {package}", flush=True)
 
 
@@ -254,7 +277,9 @@ def verify(package):
 def wait_postgres(name):
     for _ in range(90):
         try:
-            docker("exec", name, "sh", "-c", 'exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"')
+            # The entrypoint's temporary initialization server accepts Unix
+            # sockets before it shuts down again. Only the final server opens TCP.
+            docker("exec", name, "sh", "-c", 'exec pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"')
             return
         except RuntimeError:
             time.sleep(1)
@@ -371,7 +396,7 @@ def restore(package, project):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("export", "verify", "rehearsal", "restore"))
+    parser.add_argument("action", choices=("export", "seal", "verify", "rehearsal", "restore"))
     parser.add_argument("--package", required=True, type=Path)
     parser.add_argument("--project", default="weknora")
     args = parser.parse_args()
@@ -381,7 +406,7 @@ def main():
     if args.action == "restore":
         restore(package, args.project)
     else:
-        {"export": export, "verify": verify, "rehearsal": rehearsal}[args.action](package)
+        {"export": export, "seal": seal, "verify": verify, "rehearsal": rehearsal}[args.action](package)
 
 
 if __name__ == "__main__":
